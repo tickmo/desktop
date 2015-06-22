@@ -8,11 +8,11 @@ var
   lasttime: float = getTime().toSeconds()
 
 proc tick =
-  if lasttime + interval < getTime().toSeconds():
-    lasttime += interval
-    echo("Tick - ", fromSeconds(lasttime))
-    take_screenshot("screenshot.png")
+  while true:
+    if lasttime < getTime().toSeconds(): # Takes first screen with start program
+      lasttime += interval
+      echo("Tick - ", fromSeconds(lasttime))
+      take_screenshot("screenshot.png")
 
 when isMainModule:
-  while true:
-    tick()
+  tick()
