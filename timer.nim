@@ -1,9 +1,10 @@
 # Module timer
-import times, xscreenshot, xlib, xutil, x, keysym
+import times, xscreenshot, xlib, xutil, x, keysym, tables
 
 const
-  WINDOW_WIDTH = 400
-  WINDOW_HEIGHT = 50
+  WINDOW_WIDTH = 300
+  WINDOW_HEIGHT = 150
+  WINDOW_BG_COLOR = "#C5C2C5"
 
 let
   interval: float = 5 # time interval in seconds
@@ -21,6 +22,12 @@ var
   lasttime: float = getTime().toSeconds()
   status: string
   timer_running: bool = true
+  colors = initTable[string, TXColor]()
+
+proc getColor(name: string): TXColor =
+  discard XParseColor(display, DefaultColormap(display, 0), name, result.addr)
+  discard XAllocColor(display, DefaultColormap(display, 0), result.addr)
+  discard colors.hasKeyOrPut(name, result)
 
 proc create_window =
   width = WINDOW_WIDTH
@@ -36,15 +43,15 @@ proc create_window =
   win = XCreateSimpleWindow(display, rootwin, 100, 10,
                             width, height, 5,
                             XBlackPixel(display, screen),
-                            XWhitePixel(display, screen))
+                            getColor(WINDOW_BG_COLOR).pixel)
   size_hints.flags = PSize or PMinSize or PMaxSize
   size_hints.min_width =  width.cint
   size_hints.max_width =  width.cint
   size_hints.min_height = height.cint
   size_hints.max_height = height.cint
-  discard XSetStandardProperties(display, win, "Simple Window", "window",
+  discard XSetStandardProperties(display, win, "Simple time tracker", "window",
                          0, nil, 0, addr(size_hints))
-  discard XSelectInput(display, win, ButtonPressMask or KeyPressMask or 
+  discard XSelectInput(display, win, ButtonPressMask or KeyPressMask or
                                      PointerMotionMask or ExposureMask)
   discard XMapWindow(display, win)
 
@@ -65,25 +72,49 @@ proc timer_stop* =
 proc timer_active*: bool =
   return timer_running
 
+proc drawButton(x, y, w, h: cint, pressed: bool = false) =
+  if pressed:
+    discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
+    discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x + w, y)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x, y + h)
+    discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
+    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + w - 2, y + 1)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + 1, y + h - 2)
+  else:
+    discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
+    discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x + w, y)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x, y + h)
+    discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
+    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 2, y + h - 1, x + 1, y + h - 1)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 1, y + h - 2, x + w - 1, y + 1)
+
 proc draw_screen =
   # Clear draw area
-  discard XSetForeground(display, DefaultGC(display, screen), XWhitePixel(display, screen))
+  discard XSetForeground(display, DefaultGC(display, screen), getColor("#d3d3d3").pixel)
   discard XFillRectangle(display, win, DefaultGC(display, screen), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-  
+
   # Set text color
   discard XSetForeground(display, DefaultGC(display, screen), XBlackPixel(display, screen))
-  
-  # Dispay time
-  discard XDrawString(display,win, DefaultGC(display,screen), 10,40, status.cstring, status.len.cint)
-  
+
   # Display timer status
   var timer_status: string
   if timer_active():
     timer_status = "Active"
   else:
     timer_status = "Inactive"
-  timer_status &= " (Press [space] to togle)"
-  discard XDrawString(display,win, DefaultGC(display,screen), 10,20, timer_status.cstring, timer_status.len.cint)
+  discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timer_status.cstring, timer_status.len.cint)
+
+  # Dispay time
+  discard XDrawString(display, win, DefaultGC(display,screen), 40, 40, status.cstring, status.len.cint)
+
+  # Display pause button
+  drawButton(80, 60, 100, 40, timer_running)
 
 proc handle_event =
   discard XNextEvent(display, xev.addr);
