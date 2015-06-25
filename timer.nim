@@ -5,11 +5,13 @@ const
   WINDOW_WIDTH = 300
   WINDOW_HEIGHT = 150
   WINDOW_BG_COLOR = "#C5C2C5"
+  WINDOW_TITLE = "Simple time tracker"
   IDLE_TIME = 10 # idle time 10 seconds
   BUTTON_POSITION_X = 80
   BUTTON_POSITION_Y = 60
   BUTTON_WIDTH = 100
   BUTTON_HEIGHT = 40
+  BUTTON_SHADOW_COLOR = "#838183"
 
 let
   interval: float = 5 # time interval in seconds
@@ -28,9 +30,6 @@ var
   colors = initTable[string, TXColor]()
   info: TXScreenSaverInfo
   idle: float = 0.0
-  fontname = "10x20"
-  font: PXFontStruct
-  asc, desc, dir: Pcint
 
 proc getColor(name: string): TXColor =
   discard XParseColor(display, DefaultColormap(display, 0), name, result.addr)
@@ -48,26 +47,20 @@ proc createWindow =
   screen = XDefaultScreen(display)
   depth = XDefaultDepth(display, screen)
   var rootwin = XRootWindow(display, screen)
-  win = XCreateSimpleWindow(display, rootwin, 100, 10,
-                            width, height, 5,
-                            XBlackPixel(display, screen),
-                            getColor(WINDOW_BG_COLOR).pixel)
+  win = XCreateSimpleWindow(display, rootwin, 100, 10, width, height, 5, XBlackPixel(display, screen), getColor(WINDOW_BG_COLOR).pixel)
   sizeHints.flags = PSize or PMinSize or PMaxSize
   sizeHints.min_width =  width.cint
   sizeHints.max_width =  width.cint
   sizeHints.min_height = height.cint
   sizeHints.max_height = height.cint
-  discard XSetStandardProperties(display, win, "Simple time tracker", "window",
-                         0, nil, 0, addr(sizeHints))
-  discard XSelectInput(display, win, ButtonPressMask or KeyPressMask or
-                                     PointerMotionMask or ExposureMask)
+  discard XSetStandardProperties(display, win, WINDOW_TITLE, "window", 0, nil, 0, addr(sizeHints))
+  discard XSelectInput(display, win, ButtonPressMask or KeyPressMask or PointerMotionMask or ExposureMask)
   discard XMapWindow(display, win)
 
   wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", false.TBool)
   discard XSetWMProtocols(display, win, wmDeleteMessage.addr, 1)
   running = true
   info = XScreenSaverAllocInfo();
-  font = XLoadQueryFont(display, fontname)
 
 proc closeWindow =
   discard XDestroyWindow(display, win)
@@ -91,20 +84,19 @@ proc drawButton(x, y, w, h: cint, pressed: bool = false) =
     discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
-    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    discard XSetForeground(display, DefaultGC(display,screen), getColor(BUTTON_SHADOW_COLOR).pixel)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + 2, y + 1, x + w - 3, y + 1)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + 1, y + h - 2)
     timerStatus = "Active"
     discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timerStatus.cstring, timerStatus.len.cint)
   else:
-    echo($x & " " & $y & " " & $w & " " & $h)
     discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x + w, y)
     discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x, y + h)
     discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
-    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    discard XSetForeground(display, DefaultGC(display,screen), getColor(BUTTON_SHADOW_COLOR).pixel)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 2, y + h - 1, x + 1, y + h - 1)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 1, y + h - 2, x + w - 1, y + 1)
     timerStatus = "Inactive"
@@ -124,9 +116,6 @@ proc drawIdleTime(x, y: cint) = # Dispay idle time
     idleString: cstring = cstring("Your idle time is " & $time & " seconds")
     len: cint = idleString.len.cint
     overall: TXCharStruct
-  # echo(overall.width)
-  #discard XTextExtents(font, idleString, len, dir, asc, desc, overall.addr)
-  # todo: get text width and height and cleat previous text rectangle
   clearRectangle( 0, y - 20, WINDOW_WIDTH, y)
 
   if time > 0:
