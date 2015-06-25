@@ -6,6 +6,10 @@ const
   WINDOW_HEIGHT = 150
   WINDOW_BG_COLOR = "#C5C2C5"
   IDLE_TIME = 10 # idle time 10 seconds
+  BUTTON_POSITION_X = 80
+  BUTTON_POSITION_Y = 60
+  BUTTON_WIDTH = 100
+  BUTTON_HEIGHT = 40
 
 let
   interval: float = 5 # time interval in seconds
@@ -18,21 +22,22 @@ var
   win: TWindow
   sizeHints: TXSizeHints
   wmDeleteMessage: TAtom
-  running: bool
+  running, timerRunning, timerStopedManual: bool
   xev: TXEvent
   lasttime: float = getTime().toSeconds()
-  status: string
-  timer_running: bool = true
   colors = initTable[string, TXColor]()
   info: TXScreenSaverInfo
   idle: float = 0.0
+  fontname = "10x20"
+  font: PXFontStruct
+  asc, desc, dir: Pcint
 
 proc getColor(name: string): TXColor =
   discard XParseColor(display, DefaultColormap(display, 0), name, result.addr)
   discard XAllocColor(display, DefaultColormap(display, 0), result.addr)
   discard colors.hasKeyOrPut(name, result)
 
-proc create_window =
+proc createWindow =
   width = WINDOW_WIDTH
   height = WINDOW_HEIGHT
 
@@ -47,13 +52,13 @@ proc create_window =
                             width, height, 5,
                             XBlackPixel(display, screen),
                             getColor(WINDOW_BG_COLOR).pixel)
-  size_hints.flags = PSize or PMinSize or PMaxSize
-  size_hints.min_width =  width.cint
-  size_hints.max_width =  width.cint
-  size_hints.min_height = height.cint
-  size_hints.max_height = height.cint
+  sizeHints.flags = PSize or PMinSize or PMaxSize
+  sizeHints.min_width =  width.cint
+  sizeHints.max_width =  width.cint
+  sizeHints.min_height = height.cint
+  sizeHints.max_height = height.cint
   discard XSetStandardProperties(display, win, "Simple time tracker", "window",
-                         0, nil, 0, addr(size_hints))
+                         0, nil, 0, addr(sizeHints))
   discard XSelectInput(display, win, ButtonPressMask or KeyPressMask or
                                      PointerMotionMask or ExposureMask)
   discard XMapWindow(display, win)
@@ -62,22 +67,23 @@ proc create_window =
   discard XSetWMProtocols(display, win, wmDeleteMessage.addr, 1)
   running = true
   info = XScreenSaverAllocInfo();
+  font = XLoadQueryFont(display, fontname)
 
-proc close_window =
+proc closeWindow =
   discard XDestroyWindow(display, win)
   discard XCloseDisplay(display)
 
-proc timer_start* =
-  timer_running = true
+proc timerActive*: bool =
+  return timerRunning
 
-proc timer_stop* =
-  timer_running = false
-
-proc timer_active*: bool =
-  return timer_running
+proc clearRectangle(x, y, w, h: cint) = # Clear draw area
+  discard XSetForeground(display, DefaultGC(display, screen), getColor(WINDOW_BG_COLOR).pixel)
+  discard XFillRectangle(display, win, DefaultGC(display, screen), x, y, w.cuint, h.cuint)
+  discard XSetForeground(display, DefaultGC(display, screen), XBlackPixel(display, screen))
 
 proc drawButton(x, y, w, h: cint, pressed: bool = false) =
-  # todo: inner shadow was broken =(
+  clearRectangle(x, y, w, h)
+  var timerStatus: string
   if pressed:
     discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x + w, y)
@@ -85,48 +91,62 @@ proc drawButton(x, y, w, h: cint, pressed: bool = false) =
     discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
-    # discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
-    # discard XDrawLine(display, win, DefaultGC(display,screen), x + 2, y + 1, x + w - 3, y + 1)
-    # discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + 1, y + h - 2)
+    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + 2, y + 1, x + w - 3, y + 1)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + 1, y + h - 2)
+    timerStatus = "Active"
+    discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timerStatus.cstring, timerStatus.len.cint)
   else:
+    echo($x & " " & $y & " " & $w & " " & $h)
     discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x + w, y)
     discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x, y + h)
     discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
-    # discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
-    # discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 2, y + h - 1, x + 1, y + h - 1)
-    # discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 1, y + h - 2, x + w - 1, y + 1)
+    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 2, y + h - 1, x + 1, y + h - 1)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 1, y + h - 2, x + w - 1, y + 1)
+    timerStatus = "Inactive"
+    discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timerStatus.cstring, timerStatus.len.cint)
 
-proc draw_screen =
-  # Clear draw area
-  discard XSetForeground(display, DefaultGC(display, screen), getColor("#d3d3d3").pixel)
-  discard XFillRectangle(display, win, DefaultGC(display, screen), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+proc timerStart* =
+  timerRunning = true
+  drawButton(BUTTON_POSITION_X, BUTTON_POSITION_Y, BUTTON_WIDTH, BUTTON_HEIGHT, timerRunning)
 
-  # Set text color
-  discard XSetForeground(display, DefaultGC(display, screen), XBlackPixel(display, screen))
+proc timerStop* =
+  timerRunning = false
+  drawButton(BUTTON_POSITION_X, BUTTON_POSITION_Y, BUTTON_WIDTH, BUTTON_HEIGHT, timerRunning)
 
-  # Display timer status
-  var timer_status: string
-  if timer_active():
-    timer_status = "Active"
+proc drawIdleTime(x, y: cint) = # Dispay idle time
+  var time = idle.int - IDLE_TIME
+  var
+    idleString: cstring = cstring("Your idle time is " & $time & " seconds")
+    len: cint = idleString.len.cint
+    overall: TXCharStruct
+  # echo(overall.width)
+  #discard XTextExtents(font, idleString, len, dir, asc, desc, overall.addr)
+  # todo: get text width and height and cleat previous text rectangle
+  clearRectangle( 0, y - 20, WINDOW_WIDTH, y)
+
+  if time > 0:
+    discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
+    discard XDrawString(display, win, DefaultGC(display,screen), x, y, idleString, len)
+
+proc drawLastScreenshotTime(x, y: cint, status: string) = # Display last screenshot time
+  clearRectangle( 0, y - 20, WINDOW_WIDTH, y)
+  discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
+  discard XDrawString(display, win, DefaultGC(display,screen), x, y, status.cstring, status.len.cint)
+
+proc timerTogle =
+  if timerActive():
+    timerStop()
+    timerStopedManual = true
   else:
-    timer_status = "Inactive"
+    timerStart()
+    timerStopedManual = false
 
-    # Display idle time
-    var idleString: string = "Your idle time is " & $idle.int & " seconds"
-    discard XDrawString(display, win, DefaultGC(display,screen), 40, 140, idleString.cstring, idleString.len.cint)
-
-  discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timer_status.cstring, timer_status.len.cint)
-
-  # Dispay time
-  discard XDrawString(display, win, DefaultGC(display,screen), 40, 40, status.cstring, status.len.cint)
-
-  # Display pause button
-  drawButton(80, 60, 100, 40, timer_running)
-
-proc handle_event =
+proc handleEvent =
   discard XNextEvent(display, xev.addr);
   case xev.theType
   of Expose:
@@ -138,36 +158,41 @@ proc handle_event =
   of KeyPress:
     var key = XLookupKeysym(cast[PXKeyEvent](xev.addr), 0)
     if key == 0x20:
-      if timer_active():
-        timer_stop()
-      else:
-        timer_start()
-      draw_screen()
+      timerTogle()
+  of ButtonPress:
+    var
+      buttonEvent = cast[PXButtonEvent](xev.addr)
+      x = buttonEvent.x
+      y = buttonEvent.y
+    if x >= BUTTON_POSITION_X and x <= BUTTON_POSITION_X + BUTTON_WIDTH and y >= BUTTON_POSITION_Y and y <= BUTTON_POSITION_Y + BUTTON_HEIGHT and buttonEvent.button == 1:
+      timerTogle()
   else:
     discard
 
 proc tick =
-  discard XScreenSaverQueryInfo(display, XDefaultRootWindow(display), info.addr);
-  if info.idle.int > idle.int or info.idle.int < idle.int:
-    idle = info.idle.int / 1000
-    draw_screen()
+  if not timerStopedManual:
+    discard XScreenSaverQueryInfo(display, XDefaultRootWindow(display), info.addr);
+    if info.idle.int > idle.int or info.idle.int < idle.int:
+      idle = info.idle.int / 1000
+      drawIdleTime(40, 140)
 
-  if idle.int > IDLE_TIME:
-    timer_stop()
-  else:
-    timer_start()
+    if timerActive() and idle.int > IDLE_TIME:
+      timerStop()
+      timerStopedManual = false
+    elif not timerActive() and idle.int < IDLE_TIME:
+      timerStart()
 
-  var cur_time = getTime().toSeconds()
-  if timer_running and lasttime <= cur_time: # Takes first screen with start program
-    lasttime = cur_time + interval
-    take_screenshot("screens/screenshot-" & $cur_time & ".png")
-    status = "Tick - " & $fromSeconds(lasttime)
-    draw_screen()
+  var curTime = getTime().toSeconds()
+  if timerRunning and lasttime <= curTime: # Takes first screen with start program
+    lasttime = curTime + interval
+    take_screenshot("screens/screenshot-" & $curTime & ".png")
+    drawLastScreenshotTime(5, 40, "Last screenshot time - " & $fromSeconds(lasttime))
 
 when isMainModule:
-  create_window()
+  createWindow()
+  timerStart()
   while running:
     tick()
     while XPending(display) > 0:
-      handle_event()
-  close_window()
+      handleEvent()
+  closeWindow()
