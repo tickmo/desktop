@@ -1,10 +1,11 @@
 # Module timer
-import times, xscreenshot, xlib, xutil, x, keysym, tables
+import times, xscreenshot, xlib, xutil, x, keysym, tables, scrnsaver
 
 const
   WINDOW_WIDTH = 300
   WINDOW_HEIGHT = 150
   WINDOW_BG_COLOR = "#C5C2C5"
+  IDLE_TIME = 10 # idle time 10 seconds
 
 let
   interval: float = 5 # time interval in seconds
@@ -23,6 +24,8 @@ var
   status: string
   timer_running: bool = true
   colors = initTable[string, TXColor]()
+  info: TXScreenSaverInfo
+  idle: float = 0.0
 
 proc getColor(name: string): TXColor =
   discard XParseColor(display, DefaultColormap(display, 0), name, result.addr)
@@ -58,6 +61,7 @@ proc create_window =
   wmDeleteMessage = XInternAtom(display, "WM_DELETE_WINDOW", false.TBool)
   discard XSetWMProtocols(display, win, wmDeleteMessage.addr, 1)
   running = true
+  info = XScreenSaverAllocInfo();
 
 proc close_window =
   discard XDestroyWindow(display, win)
@@ -73,6 +77,7 @@ proc timer_active*: bool =
   return timer_running
 
 proc drawButton(x, y, w, h: cint, pressed: bool = false) =
+  # todo: inner shadow was broken =(
   if pressed:
     discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x + w, y)
@@ -80,9 +85,9 @@ proc drawButton(x, y, w, h: cint, pressed: bool = false) =
     discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
-    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
-    discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + w - 2, y + 1)
-    discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + 1, y + h - 2)
+    # discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    # discard XDrawLine(display, win, DefaultGC(display,screen), x + 2, y + 1, x + w - 3, y + 1)
+    # discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + 1, y + h - 2)
   else:
     discard XSetForeground(display, DefaultGC(display,screen), XWhitePixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x, y, x + w, y)
@@ -90,9 +95,9 @@ proc drawButton(x, y, w, h: cint, pressed: bool = false) =
     discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
-    discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
-    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 2, y + h - 1, x + 1, y + h - 1)
-    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 1, y + h - 2, x + w - 1, y + 1)
+    # discard XSetForeground(display, DefaultGC(display,screen), getColor("#838183").pixel)
+    # discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 2, y + h - 1, x + 1, y + h - 1)
+    # discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 1, y + h - 2, x + w - 1, y + 1)
 
 proc draw_screen =
   # Clear draw area
@@ -108,6 +113,11 @@ proc draw_screen =
     timer_status = "Active"
   else:
     timer_status = "Inactive"
+
+    # Display idle time
+    var idleString: string = "Your idle time is " & $idle.int & " seconds"
+    discard XDrawString(display, win, DefaultGC(display,screen), 40, 140, idleString.cstring, idleString.len.cint)
+
   discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timer_status.cstring, timer_status.len.cint)
 
   # Dispay time
@@ -137,6 +147,16 @@ proc handle_event =
     discard
 
 proc tick =
+  discard XScreenSaverQueryInfo(display, XDefaultRootWindow(display), info.addr);
+  if info.idle.int > idle.int or info.idle.int < idle.int:
+    idle = info.idle.int / 1000
+    draw_screen()
+
+  if idle.int > IDLE_TIME:
+    timer_stop()
+  else:
+    timer_start()
+
   var cur_time = getTime().toSeconds()
   if timer_running and lasttime <= cur_time: # Takes first screen with start program
     lasttime = cur_time + interval
