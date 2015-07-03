@@ -25,7 +25,7 @@ var
   win: TWindow
   sizeHints: TXSizeHints
   wmDeleteMessage: TAtom
-  running, timerRunning, timerStopedManual: bool
+  running, timerRunning, timerStopedManual: bool = false
   xev: TXEvent
   lastframe, lasttime: float = getTime().toSeconds()
   colors = initTable[string, TXColor]()
@@ -77,7 +77,7 @@ proc clearRectangle(x, y, w, h: cint) = # Clear draw area
   discard XSetForeground(display, DefaultGC(display, screen), XBlackPixel(display, screen))
 
 proc drawButton(x, y, w, h: cint, pressed: bool = false) =
-  clearRectangle(x, y, w, h)
+  clearRectangle(x, y, w + 2, h + 2)
   var timerStatus: string
   if pressed:
     discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
@@ -89,6 +89,7 @@ proc drawButton(x, y, w, h: cint, pressed: bool = false) =
     discard XSetForeground(display, DefaultGC(display,screen), getColor(BUTTON_SHADOW_COLOR).pixel)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + 2, y + 1, x + w - 3, y + 1)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + 1, y + 1, x + 1, y + h - 2)
+    discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     timerStatus = "Active"
     discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timerStatus.cstring, timerStatus.len.cint)
   else:
@@ -99,8 +100,9 @@ proc drawButton(x, y, w, h: cint, pressed: bool = false) =
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x, y + h)
     discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h, x + w, y)
     discard XSetForeground(display, DefaultGC(display,screen), getColor(BUTTON_SHADOW_COLOR).pixel)
-    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 2, y + h - 1, x + 1, y + h - 1)
-    discard XDrawLine(display, win, DefaultGC(display,screen), x + w - 1, y + h - 2, x + w - 1, y + 1)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w, y + h + 1, x + 1, y + h + 1)
+    discard XDrawLine(display, win, DefaultGC(display,screen), x + w + 1, y + h, x + w + 1, y + 1)
+    discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     timerStatus = "Inactive"
     discard XDrawString(display, win, DefaultGC(display,screen), 110, 85, timerStatus.cstring, timerStatus.len.cint)
 
@@ -118,14 +120,14 @@ proc drawIdleTime(x, y: cint) = # Dispay idle time
     idleString: cstring = cstring("Your idle time is " & $time & " seconds")
     len: cint = idleString.len.cint
     overall: TXCharStruct
-  clearRectangle( 0, y - 20, WINDOW_WIDTH, y)
+  clearRectangle( x, y - 20, WINDOW_WIDTH, y)
 
   if time > 0:
     discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
     discard XDrawString(display, win, DefaultGC(display,screen), x, y, idleString, len)
 
 proc drawLastScreenshotTime(x, y: cint, status: string) = # Display last screenshot time
-  clearRectangle( 0, y - 20, WINDOW_WIDTH, y)
+  clearRectangle( x, y - 20, WINDOW_WIDTH, y)
   discard XSetForeground(display, DefaultGC(display,screen), XBlackPixel(display, screen))
   discard XDrawString(display, win, DefaultGC(display,screen), x, y, status.cstring, status.len.cint)
 
