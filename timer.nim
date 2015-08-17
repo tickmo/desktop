@@ -26,10 +26,11 @@ var
   wmDeleteMessage: TAtom
   running, timerRunning, timerStopedManual: bool
   xev: TXEvent
-  lasttime: float = getTime().toSeconds()
+  lastframe, lasttime: float = getTime().toSeconds()
   colors = initTable[string, TXColor]()
   info: TXScreenSaverInfo
   idle: float = 0.0
+  fps: int = 30 # frames per second will be drawn
 
 proc getColor(name: string): TXColor =
   discard XParseColor(display, DefaultColormap(display, 0), name, result.addr)
@@ -159,9 +160,10 @@ proc handleEvent =
     discard
 
 proc tick =
+  var curTime = getTime().toSeconds()
   if not timerStopedManual:
     discard XScreenSaverQueryInfo(display, XDefaultRootWindow(display), info.addr);
-    if info.idle.int > idle.int or info.idle.int < idle.int:
+    if (info.idle.int > idle.int or info.idle.int < idle.int) and lastframe <= curTime:
       idle = info.idle.int / 1000
       drawIdleTime(40, 140)
 
@@ -171,11 +173,14 @@ proc tick =
     elif not timerActive() and idle.int < IDLE_TIME:
       timerStart()
 
-  var curTime = getTime().toSeconds()
   if timerRunning and lasttime <= curTime: # Takes first screen with start program
     lasttime = curTime + interval
     take_screenshot("screens/screenshot-" & $curTime & ".png")
     drawLastScreenshotTime(5, 40, "Last screenshot time - " & $fromSeconds(lasttime))
+
+  if lastframe <= curTime: # Takes first screen with start program
+    lastframe = curTime + 1/fps
+    drawButton(BUTTON_POSITION_X, BUTTON_POSITION_Y, BUTTON_WIDTH, BUTTON_HEIGHT, timerRunning)
 
 when isMainModule:
   createWindow()
