@@ -1,4 +1,5 @@
 # Module timer
+# compile with --deadCodeElim:on
 import times, xscreenshot, xlib, xutil, x, keysym, tables, scrnsaver
 
 const
