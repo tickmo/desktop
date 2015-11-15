@@ -1,15 +1,15 @@
-import templates, layout, jester
+import templates, layout, jester, os
+let files_path = "savedscreens/*.png"
 
-proc index*(request: PRequest): string =
-  tmpli html"""
+proc index*(request: Request): string =
+  tmpli  html"""
       <div>
           <ul>
-              <li>screnshot</li>
+            $for screen in walkFiles($files_path) {
+              <li><img src="$screen"></li>
+            }
           </ul>
       </div>
       """
 
   return layout.layout("Screenshots", result)
-
-proc save*(request: PRequest): string =
-  writeFile("filename.png", request.formData.mget("images[]").body)
