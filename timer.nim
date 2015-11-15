@@ -1,5 +1,5 @@
 # Module timer
-import times, xscreenshot, xlib, xutil, x, keysym, tables, scrnsaver
+import times, xscreenshot, xlib, xutil, x, keysym, tables, scrnsaver, screensync
 
 const
   WINDOW_WIDTH = 300
@@ -15,6 +15,7 @@ const
 
 let
   interval: float = 5 # time interval in seconds
+  syncInterval: float = 15 # time period to sync files with server
 
 var
   width, height: cuint
@@ -27,6 +28,7 @@ var
   running, timerRunning, timerStopedManual: bool = false
   xev: TXEvent
   lastframe, lasttime: float = getTime().toSeconds()
+  synctime: float = getTime().toSeconds() + syncInterval
   colors = initTable[string, TXColor]()
   info: TXScreenSaverInfo
   idle: float = 0.0
@@ -64,6 +66,7 @@ proc createWindow =
   info = XScreenSaverAllocInfo();
 
 proc closeWindow =
+  discard sync()
   discard XDestroyWindow(display, win)
   discard XCloseDisplay(display)
 
@@ -118,7 +121,6 @@ proc drawIdleTime(x, y: cint) = # Dispay idle time
   var
     idleString: cstring = cstring("Your idle time is " & $time & " seconds")
     len: cint = idleString.len.cint
-    overall: TXCharStruct
   clearRectangle( x, y - 20, WINDOW_WIDTH, y)
 
   if time > 0:
@@ -163,6 +165,7 @@ proc handleEvent =
 
 proc tick =
   var curTime = getTime().toSeconds()
+  let filename = "screens/screenshot-" & $curTime & ".png"
   if not timerStopedManual:
     discard XScreenSaverQueryInfo(display, XDefaultRootWindow(display), info.addr);
     if (info.idle.int > idle.int or info.idle.int < idle.int) and lastframe <= curTime:
@@ -175,10 +178,16 @@ proc tick =
     elif not timerActive() and idle.int < IDLE_TIME:
       timerStart()
 
-  if timerRunning and lasttime <= curTime: # Takes first screen with start program
-    lasttime = curTime + interval
-    take_screenshot("screens/screenshot-" & $curTime & ".png")
-    drawLastScreenshotTime(5, 40, "Last screenshot time - " & $fromSeconds(lasttime))
+  if timerRunning:
+    if lasttime <= curTime: # Takes first screen with start program
+      lasttime = curTime + interval
+      take_screenshot(filename)
+      files.push(filename)
+      drawLastScreenshotTime(5, 40, "Last screenshot time - " & $fromSeconds(lasttime))
+
+    if synctime <= curTime: # Sync files with remote server
+      synctime = curTime + syncInterval
+      discard sync()
 
   if lastframe <= curTime: # Takes first screen with start program
     lastframe = curTime + 1/fps
