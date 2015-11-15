@@ -22,7 +22,7 @@ proc sync*(): string =
 
   try:
     result = postContent(SYNC_URL, multipart=data)
-  except OSError:
+  except:
     while old.len() > 0:
       files.push(old.pop())
 
