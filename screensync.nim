@@ -20,7 +20,11 @@ proc sync*(): string =
     data.addFiles({"screenshots[]": filename})
     old.push(filename)
 
-  result = postContent(SYNC_URL, multipart=data)
+  try:
+    result = postContent(SYNC_URL, multipart=data)
+  except OSError:
+    while old.len() > 0:
+      files.push(old.pop())
 
   while old.len() > 0:
     var filename = old.pop()
