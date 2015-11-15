@@ -20,7 +20,13 @@ ul a {
 }
 
 ul li {
+    float: left;
+    margin-left: 15px;
     vertical-align: middle;
+}
+
+ul li img {
+  max-width: 420px;
 }
 
 #warning {

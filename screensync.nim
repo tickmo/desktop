@@ -2,7 +2,7 @@
 import httpclient, os, queues
 
 const
-  SYNC_URL = "http://localhost:5000/"
+  SYNC_URL = "http://localhost:80/"
 
 var
   files*, old: Queue[string] = initQueue[string]()
@@ -14,17 +14,21 @@ proc pop*[T](q: var Queue[T]): T =
     result = dequeue(q)
 
 proc sync*(): string =
-  var data = newMultipartData()
-  while files.len() > 0:
-    var filename = files.pop()
-    data.addFiles({"screenshots[]": filename})
-    old.push(filename)
+  if files.len() > 0:
+    var data = newMultipartData()
+    while files.len() > 0:
+      var filename = files.pop()
+      data.addFiles({"screenshots[]": filename})
+      old.push(filename)
 
-  try:
-    result = postContent(SYNC_URL, multipart=data)
-  except:
-    while old.len() > 0:
-      files.push(old.pop())
+    try:
+      result = postContent(SYNC_URL, multipart=data)
+    except:
+      while old.len() > 0:
+        files.push(old.pop())
+    
+      let msg = getCurrentExceptionMsg()
+      result = "Got exception with message " & msg
 
   while old.len() > 0:
     var filename = old.pop()

@@ -15,7 +15,7 @@ const
 
 let
   interval: float = 5 # time interval in seconds
-  syncInterval: float = 15 # time period to sync files with server
+  syncInterval: float = 5 # time period to sync files with server
 
 var
   width, height: cuint
@@ -66,7 +66,7 @@ proc createWindow =
   info = XScreenSaverAllocInfo();
 
 proc closeWindow =
-  discard sync()
+  echo sync()
   discard XDestroyWindow(display, win)
   discard XCloseDisplay(display)
 
@@ -187,7 +187,7 @@ proc tick =
 
     if synctime <= curTime: # Sync files with remote server
       synctime = curTime + syncInterval
-      discard sync()
+      echo sync()
 
   if lastframe <= curTime: # Takes first screen with start program
     lastframe = curTime + 1/fps
