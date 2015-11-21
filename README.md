@@ -1,4 +1,4 @@
-# secret-tyrion
+# Tickmo
 Time tracker with screenshots written on Nim.
 
 # TODO
