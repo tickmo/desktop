@@ -2,7 +2,7 @@
 import httpclient, os, queues
 
 const
-  SYNC_URL = "http://localhost:80/"
+  SYNC_URL = "http://secret-tyrion.dev/"
 
 var
   files*, old: Queue[string] = initQueue[string]()
