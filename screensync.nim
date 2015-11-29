@@ -2,7 +2,7 @@
 import httpclient, os, queues
 
 const
-  SYNC_URL = "http://secret-tyrion.dev/"
+  SYNC_URL = "http://tickmo-web.dev/"
 
 var
   files*, old: Queue[string] = initQueue[string]()
@@ -26,7 +26,7 @@ proc sync*(): string =
     except:
       while old.len() > 0:
         files.push(old.pop())
-    
+
       let msg = getCurrentExceptionMsg()
       result = "Got exception with message " & msg
 
