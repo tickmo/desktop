@@ -2,7 +2,8 @@
 import httpclient, os, queues
 
 const
-  SYNC_URL = "http://tickmo-web.dev/"
+  # SYNC_URL = "http://tickmo-web.dev/"
+  SYNC_URL = "http://st.evilephant.com/"
 
 var
   files*, old: Queue[string] = initQueue[string]()
