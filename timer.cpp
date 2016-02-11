@@ -1,5 +1,8 @@
 #include "timer.h"
 
+// Declaring address host to send. (e.g. "http://tickmo-web.dev/")
+const char* SERVER_TO_SEND = "http://st.evilephant.com/";
+
 Timer::Timer(MainWindow *parent) :
     QTimer(parent)
 {
@@ -58,8 +61,7 @@ void Timer::save()
         QString fileName = QString(tempDir.path() + "/screenshot-" + QString::number(second) + "." + format);
         originalPixmap.save(fileName, format.toUtf8().constData());
         mainWindow->setImage(originalPixmap);
-        // QString url = "http://tickmo-web.dev/";
-        QString url = "http://st.evilephant.com/";
+        QString url = SERVER_TO_SEND;
         Uploader.uploadImage(fileName, url, "screenshots[]");
     }
 }

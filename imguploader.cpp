@@ -3,7 +3,7 @@
 imgUploader::imgUploader(QObject *parent) :
     QObject(parent)
 {
-    UserAgent = "TickMo";
+    UserAgent = "tickmo";
     Uploading = false;
 }
 

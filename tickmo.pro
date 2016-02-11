@@ -1,6 +1,6 @@
 QT += widgets \
       network
-TARGET = TickMo
+TARGET = tickmo
 CONFIG += release
 CONFIG += staticlib
 HEADERS     = \

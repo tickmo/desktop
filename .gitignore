@@ -2,7 +2,8 @@ nimcache/
 timer
 xscreenshot
 screensync
-libTickMo.a
+libtickmo.a
 qtcache/
 Makefile
 tickmo.pro.user
+tickmo

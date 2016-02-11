@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    settings = new QSettings("TickMo", "TickMo");
+    settings = new QSettings("tickmo", "tickmo");
     timer = new Timer(this);
 
     basicDimension = ui->graphicsView->geometry();
