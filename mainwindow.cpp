@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowIcon(QIcon(icon));
 
     trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(icon);
+    trayIcon->setIcon(QIcon(icon));
     trayIcon->show();
 
     minimizeAction = new QAction(tr("Mi&nimize"), this);
