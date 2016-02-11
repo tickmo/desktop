@@ -1,46 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QGraphicsScene>
-#include <QDebug>
-#include <QString>
-#include <QSystemTrayIcon>
-#include <QAction>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QLabel>
-#include <QLineEdit>
-#include <QMenu>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QTextEdit>
-#include <QVBoxLayout>
-#include <QMessageBox>
-
-bool timerActive();
-void timerStart();
-void timerStop();
-void timerToggle();
-char* tick();
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    settings = new QSettings("tickmo", "tickmo");
+    timer = new Timer(this);
 
-    connect(&timer, SIGNAL (timeout()), this, SLOT (do_work()));
-    timer.start(1000);
-    QString filename = QString("default.png");
-    setImage(filename);
+    basicDimension = ui->graphicsView->geometry();
 
-    QPixmap pixmap(filename);
-    QPixmap icon = pixmap.scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    resetImage();
+    QPixmap icon = QPixmap(":/icon/default.png").scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     setWindowIcon(QIcon(icon));
 
     trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(icon);
+    trayIcon->setIcon(QIcon(icon));
     trayIcon->show();
 
     minimizeAction = new QAction(tr("Mi&nimize"), this);
@@ -63,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
     trayIconMenu->addAction(quitAction);
 
     trayIcon->setContextMenu(trayIconMenu);
+
+    settingsDialog = 0;
 }
 
 MainWindow::~MainWindow()
@@ -72,42 +50,52 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_tickButton_clicked()
 {
-    timerToggle();
+    timer->toggle();
+    resetImage();
     setButtonText();
 }
 
-void MainWindow::do_work()
+void MainWindow::resetImage()
 {
-    char* filename = tick();
-    QString string = QString(filename);
-    if (!string.isEmpty()) {
-        setImage(string);
+    if (!timer->active()) {
+        QPixmap pixmap(QString(":/icon/default.png"));
+        setImage(pixmap);
     }
-    setButtonText();
 }
 
-void MainWindow::setImage(QString filename)
+void MainWindow::setImage(QPixmap pixmap)
 {
-    QGraphicsScene *scene = new QGraphicsScene();
-    QPixmap pixmap(filename);
-    int x = ui->graphicsView->geometry().x();
-    int y = ui->graphicsView->geometry().y();
-    int width = ui->graphicsView->geometry().width();
-    int height = ui->graphicsView->geometry().height();
+    int x = basicDimension.x();
+    int y = basicDimension.y();
+    int width = basicDimension.width();
+    int height = basicDimension.height();
     QPixmap scaled = pixmap.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    scene->addPixmap(scaled);
     int centerX = ( ( width - scaled.width() ) / 2 ) + x;
     int centerY = ( ( height - scaled.height() ) / 2 ) + y;
+    QGraphicsScene *scene = new QGraphicsScene();
+    scene->addPixmap(scaled);
     ui->graphicsView->setGeometry(centerX, centerY, scaled.width(), scaled.height());
     ui->graphicsView->setScene(scene);
 }
 
 void MainWindow::setButtonText()
 {
-    if (timerActive()) {
+    if (timer->active()) {
         ui->tickButton->setText("Stop");
     }
     else {
         ui->tickButton->setText("Start");
     }
 }
+
+void MainWindow::on_toolButton_clicked()
+{
+    if (!settingsDialog) {
+        settingsDialog = new SettingsDialog(settings, this);
+    }
+
+    if (settingsDialog->exec()) {
+        settingsDialog->show();
+    }
+}
+

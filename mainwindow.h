@@ -5,17 +5,29 @@
 #include <QTimer>
 #include <QString>
 #include <QSystemTrayIcon>
+#include <QSettings>
+#include <QGraphicsScene>
+#include <QDebug>
+#include <QString>
+#include <QSystemTrayIcon>
+#include <QAction>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenu>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QTextEdit>
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QRect>
 
-class QAction;
-class QCheckBox;
-class QComboBox;
-class QGroupBox;
-class QLabel;
-class QLineEdit;
-class QMenu;
-class QPushButton;
-class QSpinBox;
-class QTextEdit;
+#include "settingsdialog.h"
+#include "timer.h"
+
+class Timer;
 
 namespace Ui {
 class MainWindow;
@@ -28,16 +40,19 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void setImage(QPixmap pixmap);
 
 private slots:
     void on_tickButton_clicked();
-    void do_work();
+    void on_toolButton_clicked();
 
 private:
-    Ui::MainWindow *ui;
-    QTimer timer;
-    void setImage(QString filename);
     void setButtonText();
+    void resetImage();
+    Ui::MainWindow *ui;
+    Timer *timer;
+    QSettings *settings;
+
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
 
@@ -45,6 +60,10 @@ private:
     QAction *maximizeAction;
     QAction *restoreAction;
     QAction *quitAction;
+    QAction *openSettingsAction;
+
+    SettingsDialog *settingsDialog;
+    QRect basicDimension;
 };
 
 #endif // MAINWINDOW_H
