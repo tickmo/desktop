@@ -1,7 +1,7 @@
 #include "timer.h"
 
 // Declaring address host to send. (e.g. "http://tickmo-web.dev/")
-const char* SERVER_TO_SEND = "http://st.evilephant.com/";
+const char* SERVER_TO_SEND = "http://tickmo-web.dev/";
 
 Timer::Timer(MainWindow *parent) :
     QTimer(parent)
