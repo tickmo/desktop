@@ -6,7 +6,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrl>
-#include "timer.h"
+#include "mainwindow.h"
 
 SettingsDialog::SettingsDialog(QSettings *parentSettings, QWidget *parent, Qt::WindowFlags f) :
     QDialog(parent, f),
@@ -14,10 +14,10 @@ SettingsDialog::SettingsDialog(QSettings *parentSettings, QWidget *parent, Qt::W
 {
     ui->setupUi(this);
     settings = parentSettings;
-    settings->beginGroup("User");
-    ui->login->setText(settings->value("name").toString());
-    ui->passwd->setText(settings->value("pass").toString());
-    settings->endGroup();
+    QString name = settings->value("User/name").toString();
+    if (name.length() > 0) {
+        labelText(name);
+    }
 }
 
 SettingsDialog::~SettingsDialog()
@@ -39,7 +39,7 @@ void SettingsDialog::on_loginButton_clicked()
     QNetworkAccessManager mgr;
     QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
-    QString url_str = "http://tickmo-web.dev/api/v1/sessions";
+    QString url_str = MainWindow::api_url("api/v1/sessions");
     QUrl url = QUrl(url_str);
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json;");
@@ -49,14 +49,22 @@ void SettingsDialog::on_loginButton_clicked()
     if (reply->error() == QNetworkReply::NoError)
     {
         QJsonDocument replyData = QJsonDocument::fromJson(reply->readAll());
-        settings->beginGroup("User");
-        settings->setValue("token", replyData.object().value("token").toString());
-        settings->endGroup();
+        settings->setValue("User/token", replyData.object().value("token").toString());
+        QString name = replyData.object().value("name").toString();
+        settings->setValue("User/name", name);
+        labelText(name);
+        ui->login->clear();
+        ui->passwd->clear();
         delete reply;
         this->close();
     }
     else
     {
+        ui->passwd->clear();
         ui->passwd->setStyleSheet("border: 1px solid red; padding: 5px 20px");
     }
+}
+
+void SettingsDialog::labelText(QString name) {
+    ui->label->setText(tr("Hello, %1").arg(name));
 }

@@ -1,7 +1,6 @@
 QT += widgets \
       network
 TARGET = tickmo
-CONFIG += release
 CONFIG += staticlib
 HEADERS     = \
     mainwindow.h \
@@ -24,3 +23,5 @@ RCC_DIR = qtcache/rcc
 UI_DIR = qtcache/ui
 
 RESOURCES = timer.qrc
+
+CONFIG(debug, release|debug): DEFINES += DEBUG

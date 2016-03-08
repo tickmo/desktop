@@ -22,6 +22,7 @@ private slots:
 private:
     Ui::SettingsDialog *ui;
     QSettings *settings;
+    void labelText(QString name);
 };
 
 #endif // SETTINGSDIALOG_H

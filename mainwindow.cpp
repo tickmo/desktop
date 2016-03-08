@@ -1,6 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#ifndef DEBUG
+    const QString API_URL = "http://st.evilephant.com/";
+#else
+    const QString API_URL = "http://tickmo-web.dev/";
+#endif
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -41,6 +47,10 @@ MainWindow::MainWindow(QWidget *parent) :
     trayIcon->setContextMenu(trayIconMenu);
 
     settingsDialog = 0;
+
+    if (!isLoggedIn()) {
+        openSettings();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -48,11 +58,21 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QString MainWindow::api_url(QString str)
+{
+    return API_URL + str;
+}
+
 void MainWindow::on_tickButton_clicked()
 {
-    timer->toggle();
-    resetImage();
-    setButtonText();
+    if (!isLoggedIn()) {
+        openSettings();
+    }
+    else {
+        timer->toggle();
+        resetImage();
+        setButtonText();
+    }
 }
 
 void MainWindow::resetImage()
@@ -90,6 +110,11 @@ void MainWindow::setButtonText()
 
 void MainWindow::on_toolButton_clicked()
 {
+    openSettings();
+}
+
+void MainWindow::openSettings()
+{
     if (!settingsDialog) {
         settingsDialog = new SettingsDialog(settings, this);
     }
@@ -97,5 +122,10 @@ void MainWindow::on_toolButton_clicked()
     if (settingsDialog->exec()) {
         settingsDialog->show();
     }
+}
+
+bool MainWindow::isLoggedIn()
+{
+    return settings->value("User/token").toString().length() > 0;
 }
 

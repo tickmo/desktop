@@ -56,7 +56,7 @@
     <number>32</number>
    </property>
    <property name="placeholderText">
-    <string>Username</string>
+    <string>Email</string>
    </property>
    <property name="cursorMoveStyle">
     <enum>Qt::VisualMoveStyle</enum>
@@ -152,7 +152,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Put you logo here :)</string>
+    <string>Sign in</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

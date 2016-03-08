@@ -41,6 +41,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void setImage(QPixmap pixmap);
+    static QString api_url(QString str);
 
 private slots:
     void on_tickButton_clicked();
@@ -49,6 +50,8 @@ private slots:
 private:
     void setButtonText();
     void resetImage();
+    void openSettings();
+    bool isLoggedIn();
     Ui::MainWindow *ui;
     Timer *timer;
     QSettings *settings;
