@@ -51,7 +51,7 @@ private slots:
 private:
     bool running;
     QTime nextSyncTime;
-    static const int INTERVAL = 10;
+    static const int INTERVAL = 3 * 60;
     void increaseInterval();
     void save();
     void shoot();

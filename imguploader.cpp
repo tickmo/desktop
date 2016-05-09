@@ -1,33 +1,53 @@
 #include "imguploader.h"
+#include "mainwindow.h"
 
 imgUploader::imgUploader(QObject *parent) :
     QObject(parent)
 {
     UserAgent = "tickmo";
     Uploading = false;
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(onUploadTimeIsCome()));
+    timer->start(UPLOAD_INTERVAL);
+    quitAfterUploading = false;
 }
 
-void imgUploader::uploadImage(QString FileName, QString UploadURL, QString FieldName)
+void imgUploader::uploadImage(QString FileName)
 {
+    filesQueue.append(FileName);
+}
 
-    QUrl serviceUrl = QUrl(UploadURL);
+void imgUploader::uploadFiles(bool quitAfterAll)
+{
+    quitAfterUploading = quitAfterAll;
+    if (filesQueue.isEmpty()) {
+        if (quitAfterUploading) {
+            QApplication::quit();
+        }
+        return;
+    }
+    QUrl serviceUrl = QUrl(MainWindow::api_url("api/v1/file"));
 
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::UserAgentHeader, UserAgent);
 
-    QFile *file = new QFile(FileName);
-    QFileInfo *fileInfo = new QFileInfo(FileName);
-    file->setParent(multiPart);
-    file->open(QIODevice::ReadOnly);
+    while (!filesQueue.isEmpty())
+    {
+        QString FileName = filesQueue.takeFirst();
+        QFile *file = new QFile(FileName);
+        QFileInfo *fileInfo = new QFileInfo(FileName);
+        file->setParent(multiPart);
+        file->open(QIODevice::ReadOnly);
 
-    QHttpPart imagePart;
-    imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
-    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"" + FieldName + "\"; filename=\"" + fileInfo->fileName() +  "\""));
+        QHttpPart imagePart;
+        imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
+        imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"screenshots[]\"; filename=\"" + fileInfo->fileName() +  "\""));
 
-    imagePart.setBodyDevice(file);
-    multiPart->append(imagePart);
+        imagePart.setBodyDevice(file);
+        multiPart->append(imagePart);
+    }
 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=" + multiPart->boundary());
     currentUpload =  manager.post(request, multiPart);
@@ -49,9 +69,17 @@ void imgUploader::onUploadFinished()
     Uploading = false;
     currentUpload->deleteLater();
     emit uploadFinished();
+    if (quitAfterUploading) {
+        QApplication::quit();
+    }
 }
 
 void imgUploader::onUploadProgress(qint64 uploaded, qint64 total)
 {
     emit uploadProgress( uploaded,  total);
+}
+
+void imgUploader::onUploadTimeIsCome()
+{
+    uploadFiles();
 }

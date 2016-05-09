@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #ifndef DEBUG
-    const QString API_URL = "http://st.evilephant.com/";
+    const QString API_URL = "http://trytickmo.com/";
 #else
     const QString API_URL = "http://tickmo-web.dev/";
 #endif
@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tickAction, SIGNAL(triggered()), this, SLOT(on_tickButton_clicked()));
 
     quitAction = new QAction(tr("&Quit"), this);
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(tickAction);
@@ -49,6 +49,13 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    timer->Uploader.uploadFiles(true);
+    event->ignore();
+}
+
 
 QString MainWindow::api_url(QString str)
 {

@@ -59,8 +59,7 @@ void Timer::save()
         QString fileName = QString(tempDir.path() + "/screenshot-" + QString::number(second) + "." + format);
         originalPixmap.save(fileName, format.toUtf8().constData());
         mainWindow->setImage(originalPixmap);
-        QString url = MainWindow::api_url("api/v1/file");
-        Uploader.uploadImage(fileName, url, "screenshots[]");
+        Uploader.uploadImage(fileName);
     }
 }
 

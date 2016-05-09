@@ -23,6 +23,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QRect>
+#include <QCloseEvent>
 
 #include "settingsdialog.h"
 #include "timer.h"
@@ -40,6 +41,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void closeEvent(QCloseEvent *event);
     void setImage(QPixmap pixmap);
     static QString api_url(QString str);
 
