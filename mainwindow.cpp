@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #ifndef DEBUG
-    const QString API_URL = "http://trytickmo.com/";
+    const QString API_URL = "https://trytickmo.com/";
 #else
     const QString API_URL = "http://tickmo-web.dev/";
 #endif
