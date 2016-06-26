@@ -5,6 +5,7 @@
 #include <QGraphicsView>
 #include <QPixmap>
 #include <QRect>
+#include <QDebug>
 
 class MainImage : public QObject
 {

@@ -7,7 +7,6 @@
 #include <QSystemTrayIcon>
 #include <QSettings>
 #include <QGraphicsScene>
-#include <QDebug>
 #include <QString>
 #include <QSystemTrayIcon>
 #include <QAction>

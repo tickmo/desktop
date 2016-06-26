@@ -7,7 +7,6 @@
 #include <QPixmap>
 #include <QByteArray>
 #include <QTime>
-#include <QDebug>
 #include <QApplication>
 #include <QDir>
 #include <QScreen>
@@ -45,7 +44,7 @@ private slots:
 
 private:
     bool running;
-    QTime *nextSyncTime;
+    QTime nextSyncTime;
     static const int INTERVAL = 3 * 60;
     void increaseInterval();
     void save(QPixmap pixmap);

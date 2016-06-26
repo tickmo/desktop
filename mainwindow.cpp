@@ -68,7 +68,6 @@ void MainWindow::on_tickButton_clicked()
     }
     else {
         timer->toggle();
-        image->reset();
         setButtonText();
     }
 }

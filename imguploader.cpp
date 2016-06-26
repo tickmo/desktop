@@ -61,7 +61,7 @@ void imgUploader::uploadFiles(bool quitAfterAll)
     currentUpload =  manager.post(request, multiPart);
     multiPart->setParent(currentUpload);
 
-    connect(currentUpload,SIGNAL(uploadProgress(qint64,qint64)),this, SLOT(onUploadProgress(qint64,qint64)));
+    connect(currentUpload, SIGNAL(uploadProgress(qint64,qint64)),this, SLOT(onUploadProgress(qint64,qint64)));
     connect(currentUpload, SIGNAL(finished()),this,SLOT(onUploadFinished()));
 
     uploading = true;

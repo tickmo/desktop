@@ -6,7 +6,7 @@ Timer::Timer(imgUploader *imageUploader, MainImage *mainImage, QObject *parent) 
     uploader = imageUploader;
     image = mainImage;
     running = false;
-    nextSyncTime->currentTime();
+    nextSyncTime = QTime().currentTime();
     increaseInterval();
     connect(this, SIGNAL (timeout()), this, SLOT (tick()));
     start(1000);
@@ -28,6 +28,7 @@ void Timer::pause()
 {
     running = false;
     image->reset();
+    uploader->uploadFiles(false);
 }
 
 void Timer::toggle()
@@ -41,7 +42,7 @@ void Timer::toggle()
 void Timer::tick()
 {
     QTime current = QTime().currentTime();
-    if (running && *nextSyncTime <= current) {
+    if (running && nextSyncTime <= current) {
         increaseInterval();
         shoot();
     }
@@ -49,7 +50,7 @@ void Timer::tick()
 
 void Timer::increaseInterval()
 {
-    nextSyncTime->currentTime().addSecs(INTERVAL);
+    nextSyncTime = nextSyncTime.currentTime().addSecs(INTERVAL);
 }
 
 void Timer::save(QPixmap pixmap)
@@ -69,7 +70,8 @@ void Timer::shoot()
 {
     QScreen *screen = QGuiApplication::primaryScreen();
     if (screen) {
-        QPixmap pixmap = screen->grabWindow(0);
+        QPixmap pixmap;
+        pixmap = screen->grabWindow(0);
         save(pixmap);
     }
 }

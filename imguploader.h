@@ -10,7 +10,6 @@
 #include <QFileInfo>
 #include <QTimer>
 #include <QSettings>
-#include <QDebug>
 
 class imgUploader : public QObject
 {
@@ -23,7 +22,7 @@ public:
     bool isUploading();
 
 private:
-    static const int UPLOAD_INTERVAL = 30 * 60 * 1000;
+    static const int UPLOAD_INTERVAL = 30 * 60;
     QSettings *settings;
     QNetworkAccessManager manager;
     QNetworkReply *currentUpload;
