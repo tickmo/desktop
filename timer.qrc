@@ -1,6 +1,9 @@
 <RCC>
-    <qresource>
+    <qresource prefix="/">
         <file>icon/default.png</file>
         <file>icon/config.png</file>
+        <file>icon/trytickmo.gif</file>
+        <file>icon/lock.png</file>
+        <file>icon/mail.png</file>
     </qresource>
 </RCC>

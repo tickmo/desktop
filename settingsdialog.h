@@ -18,11 +18,15 @@ public:
 
 private slots:
     void on_loginButton_clicked();
+    void on_login_textChanged(QString text);
 
 private:
     Ui::SettingsDialog *ui;
     QSettings *settings;
     void labelText(QString name);
+    QString errorStyle;
+    QString loginStyle;
+    QString passwdStyle;
 };
 
 #endif // SETTINGSDIALOG_H

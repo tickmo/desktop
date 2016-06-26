@@ -5,7 +5,6 @@
 #include <QSettings>
 #include <QTime>
 #include <QPixmap>
-#include <QTemporaryDir>
 #include <QByteArray>
 #include <QTime>
 #include <QDebug>

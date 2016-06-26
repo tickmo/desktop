@@ -18,6 +18,9 @@ SettingsDialog::SettingsDialog(QSettings *parentSettings, QWidget *parent, Qt::W
     if (name.length() > 0) {
         labelText(name);
     }
+    errorStyle = "border: 1px solid red;";
+    loginStyle = ui->login->styleSheet();
+    passwdStyle = ui->passwd->styleSheet();
 }
 
 SettingsDialog::~SettingsDialog()
@@ -61,7 +64,17 @@ void SettingsDialog::on_loginButton_clicked()
     else
     {
         ui->passwd->clear();
-        ui->passwd->setStyleSheet("border: 1px solid red; padding: 5px 20px");
+        ui->passwd->setStyleSheet(passwdStyle + errorStyle);
+        if (ui->login->text().isEmpty()) {
+            ui->login->setStyleSheet(loginStyle + errorStyle);
+        }
+    }
+}
+
+void SettingsDialog::on_login_textChanged(QString text)
+{
+    if (!text.isEmpty()) {
+        ui->login->setStyleSheet(loginStyle);
     }
 }
 
