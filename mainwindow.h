@@ -22,13 +22,12 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include <QRect>
 #include <QCloseEvent>
 
 #include "settingsdialog.h"
+#include "imguploader.h"
 #include "timer.h"
-
-class Timer;
+#include "mainimage.h"
 
 namespace Ui {
     class MainWindow;
@@ -42,7 +41,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void closeEvent(QCloseEvent *event);
-    void setImage(QPixmap pixmap);
     static QString api_url(QString str);
 
 private slots:
@@ -51,12 +49,15 @@ private slots:
 
 private:
     void setButtonText();
-    void resetImage();
     void openSettings();
     bool isLoggedIn();
     Ui::MainWindow *ui;
+
     Timer *timer;
     QSettings *settings;
+    imgUploader *uploader;
+    SettingsDialog *settingsDialog;
+    MainImage *image;
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
@@ -64,9 +65,6 @@ private:
     QAction *tickAction;
     QAction *quitAction;
     QAction *openSettingsAction;
-
-    SettingsDialog *settingsDialog;
-    QRect basicDimension;
 };
 
 #endif // MAINWINDOW_H

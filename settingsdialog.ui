@@ -677,7 +677,7 @@ color: rgb(65, 65, 65);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="forgot_passwd">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -705,7 +705,7 @@ color: rgb(65, 65, 65);</string>
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="mail_icon">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -724,7 +724,7 @@ color: rgb(65, 65, 65);</string>
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="lock_icon">
    <property name="geometry">
     <rect>
      <x>41</x>

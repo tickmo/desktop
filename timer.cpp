@@ -1,15 +1,15 @@
 #include "timer.h"
-#include "mainwindow.h"
 
-Timer::Timer(MainWindow *parent) :
+Timer::Timer(imgUploader *imageUploader, MainImage *mainImage, QObject *parent) :
     QTimer(parent)
 {
+    uploader = imageUploader;
+    image = mainImage;
     running = false;
-    nextSyncTime = QTime().currentTime();
+    nextSyncTime->currentTime();
     increaseInterval();
     connect(this, SIGNAL (timeout()), this, SLOT (tick()));
     start(1000);
-    mainWindow = parent;
 }
 
 bool Timer::active()
@@ -27,6 +27,7 @@ void Timer::run()
 void Timer::pause()
 {
     running = false;
+    image->reset();
 }
 
 void Timer::toggle()
@@ -40,7 +41,7 @@ void Timer::toggle()
 void Timer::tick()
 {
     QTime current = QTime().currentTime();
-    if (running && nextSyncTime <= current) {
+    if (running && *nextSyncTime <= current) {
         increaseInterval();
         shoot();
     }
@@ -48,27 +49,27 @@ void Timer::tick()
 
 void Timer::increaseInterval()
 {
-    nextSyncTime = nextSyncTime.currentTime().addSecs(INTERVAL);
+    nextSyncTime->currentTime().addSecs(INTERVAL);
 }
 
-void Timer::save()
+void Timer::save(QPixmap pixmap)
 {
-    qint64 second = QDateTime::currentMSecsSinceEpoch();
-    QString format = "png";
     if (tempDir.isValid()) {
+        image->set(pixmap);
+        // Send image to uploader.
+        qint64 second = QDateTime::currentMSecsSinceEpoch();
+        QString format = "png";
         QString fileName = QString(tempDir.path() + "/screenshot-" + QString::number(second) + "." + format);
-        originalPixmap.save(fileName, format.toUtf8().constData());
-        mainWindow->setImage(originalPixmap);
-        Uploader.uploadImage(fileName);
+        pixmap.save(fileName, format.toUtf8().constData());
+        uploader->uploadImage(fileName);
     }
 }
 
 void Timer::shoot()
 {
-    originalPixmap = QPixmap();
     QScreen *screen = QGuiApplication::primaryScreen();
     if (screen) {
-        originalPixmap = screen->grabWindow(0);
-        save();
+        QPixmap pixmap = screen->grabWindow(0);
+        save(pixmap);
     }
 }

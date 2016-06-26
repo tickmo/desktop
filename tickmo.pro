@@ -6,13 +6,15 @@ HEADERS     = \
     mainwindow.h \
     settingsdialog.h \
     timer.h \
-    imguploader.h
+    imguploader.h \
+    mainimage.h
 SOURCES     = \
               main.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \
     timer.cpp\
-    imguploader.cpp
+    imguploader.cpp \
+    mainimage.cpp
 FORMS += \
     mainwindow.ui \
     settingsdialog.ui

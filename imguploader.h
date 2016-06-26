@@ -9,25 +9,29 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QTimer>
-
+#include <QSettings>
 #include <QDebug>
+
 class imgUploader : public QObject
 {
     Q_OBJECT
 public:
-    explicit imgUploader(QObject *parent = 0);
+    explicit imgUploader(QSettings *parentSettings, QObject *parent = 0);
     void uploadImage(QString FileName);
     void uploadFiles(bool quitAfterAll = false);
     QString UserAgent;
     bool isUploading();
+
 private:
     static const int UPLOAD_INTERVAL = 30 * 60 * 1000;
+    QSettings *settings;
     QNetworkAccessManager manager;
     QNetworkReply *currentUpload;
     QTimer *timer;
     QStringList filesQueue;
-    bool Uploading;
+    bool uploading;
     bool quitAfterUploading;
+    int removeFirstFromFileQueue;
 
 signals:
     void uploadProgress(qint64 uploaded, qint64 total);

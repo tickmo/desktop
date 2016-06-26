@@ -26,37 +26,34 @@
 #include <QByteArray>
 #include <QFile>
 
-#include "mainwindow.h"
 #include "imguploader.h"
-
-class MainWindow;
-class Timer;
+#include "mainimage.h"
 
 class Timer : public QTimer
 {
     Q_OBJECT
 
 public:
-    explicit Timer(MainWindow *parent = 0);
+    explicit Timer(imgUploader *imageUploader, MainImage *mainImage, QObject *parent = 0);
     bool active();
     void run();
     void pause();
     void toggle();
-    imgUploader Uploader;
 
 private slots:
     void tick();
 
 private:
     bool running;
-    QTime nextSyncTime;
+    QTime *nextSyncTime;
     static const int INTERVAL = 3 * 60;
     void increaseInterval();
-    void save();
+    void save(QPixmap pixmap);
     void shoot();
     QPixmap originalPixmap;
     QTemporaryDir tempDir;
-    MainWindow *mainWindow;
+    imgUploader *uploader;
+    MainImage *image;
 };
 
 #endif // TIMER_H

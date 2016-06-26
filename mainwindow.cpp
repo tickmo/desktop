@@ -13,11 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     settings = new QSettings("tickmo", "tickmo");
-    timer = new Timer(this);
+    uploader = new imgUploader(settings, this);
+    image = new MainImage(ui->graphicsView, this);
+    timer = new Timer(uploader, image, this);
 
-    basicDimension = ui->graphicsView->geometry();
-
-    resetImage();
     QPixmap icon = QPixmap(":/icon/default.png").scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     setWindowIcon(QIcon(icon));
 
@@ -52,7 +51,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    timer->Uploader.uploadFiles(true);
+    uploader->uploadFiles(true);
     event->ignore();
 }
 
@@ -69,32 +68,9 @@ void MainWindow::on_tickButton_clicked()
     }
     else {
         timer->toggle();
-        resetImage();
+        image->reset();
         setButtonText();
     }
-}
-
-void MainWindow::resetImage()
-{
-    if (!timer->active()) {
-        QPixmap pixmap(QString(":/icon/default.png"));
-        setImage(pixmap);
-    }
-}
-
-void MainWindow::setImage(QPixmap pixmap)
-{
-    int x = basicDimension.x();
-    int y = basicDimension.y();
-    int width = basicDimension.width();
-    int height = basicDimension.height();
-    QPixmap scaled = pixmap.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    int centerX = ( ( width - scaled.width() ) / 2 ) + x;
-    int centerY = ( ( height - scaled.height() ) / 2 ) + y;
-    QGraphicsScene *scene = new QGraphicsScene();
-    scene->addPixmap(scaled);
-    ui->graphicsView->setGeometry(centerX, centerY, scaled.width(), scaled.height());
-    ui->graphicsView->setScene(scene);
 }
 
 void MainWindow::setButtonText()

@@ -14,10 +14,6 @@ SettingsDialog::SettingsDialog(QSettings *parentSettings, QWidget *parent, Qt::W
 {
     ui->setupUi(this);
     settings = parentSettings;
-    QString name = settings->value("User/name").toString();
-    if (name.length() > 0) {
-        labelText(name);
-    }
     errorStyle = "border: 1px solid red;";
     loginStyle = ui->login->styleSheet();
     passwdStyle = ui->passwd->styleSheet();
@@ -55,7 +51,6 @@ void SettingsDialog::on_loginButton_clicked()
         settings->setValue("User/token", replyData.object().value("token").toString());
         QString name = replyData.object().value("name").toString();
         settings->setValue("User/name", name);
-        labelText(name);
         ui->login->clear();
         ui->passwd->clear();
         delete reply;
@@ -76,8 +71,4 @@ void SettingsDialog::on_login_textChanged(QString text)
     if (!text.isEmpty()) {
         ui->login->setStyleSheet(loginStyle);
     }
-}
-
-void SettingsDialog::labelText(QString name) {
-    ui->label->setText(tr("Hello, %1").arg(name));
 }

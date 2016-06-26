@@ -5,7 +5,7 @@
 #include <QSettings>
 
 namespace Ui {
-class SettingsDialog;
+    class SettingsDialog;
 }
 
 class SettingsDialog : public QDialog
@@ -23,7 +23,6 @@ private slots:
 private:
     Ui::SettingsDialog *ui;
     QSettings *settings;
-    void labelText(QString name);
     QString errorStyle;
     QString loginStyle;
     QString passwdStyle;
