@@ -35,7 +35,7 @@ void imgUploader::uploadFiles(bool quitAfterAll)
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::UserAgentHeader, UserAgent);
 
-    QString username = settings->value("User/name").toString();
+    QString username = settings->value("User/login").toString();
     QString token = settings->value("User/token").toString();
     QString authHeader = "Token token=\"" + token + "\", user_email=\"" + username + "\"";
     request.setRawHeader("Authorization", authHeader.toLocal8Bit());

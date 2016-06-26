@@ -46,14 +46,11 @@
     </font>
    </property>
    <property name="styleSheet">
-    <string notr="true">padding: 12px 35px;
+    <string notr="true">padding: 10px 35px;
 color: rgb(65, 65, 65);</string>
    </property>
    <property name="inputMethodHints">
     <set>Qt::ImhLowercaseOnly</set>
-   </property>
-   <property name="text">
-    <string/>
    </property>
    <property name="maxLength">
     <number>32</number>
@@ -202,7 +199,7 @@ color: rgb(65, 65, 65);</string>
     </font>
    </property>
    <property name="styleSheet">
-    <string notr="true">padding: 12px 35px;
+    <string notr="true">padding: 10px 35px;
 color: rgb(65, 65, 65);</string>
    </property>
    <property name="maxLength">

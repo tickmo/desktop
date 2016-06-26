@@ -6,6 +6,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrl>
+#include <QDebug>
 #include "mainwindow.h"
 
 SettingsDialog::SettingsDialog(QSettings *parentSettings, QWidget *parent, Qt::WindowFlags f) :
@@ -14,6 +15,7 @@ SettingsDialog::SettingsDialog(QSettings *parentSettings, QWidget *parent, Qt::W
 {
     ui->setupUi(this);
     settings = parentSettings;
+    ui->login->setText(settings->value("User/login").toString());
     errorStyle = "border: 1px solid red;";
     loginStyle = ui->login->styleSheet();
     passwdStyle = ui->passwd->styleSheet();
@@ -26,9 +28,11 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::on_loginButton_clicked()
 {
+    QString login = ui->login->text();
+    settings->setValue("User/login", login);
     QJsonObject json;
     QJsonObject userData;
-    userData["email"] = ui->login->text();
+    userData["email"] = login;
     userData["password"] = ui->passwd->text();
     json["user"] = userData;
     QJsonDocument doc(json);
