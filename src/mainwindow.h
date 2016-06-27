@@ -23,9 +23,9 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 
-#include "settingsdialog.h"
-#include "imguploader.h"
-#include "timer.h"
+#include "settings/settingsdialog.h"
+#include "uploader/imguploader.h"
+#include "timer/timer.h"
 #include "mainimage.h"
 
 namespace Ui {

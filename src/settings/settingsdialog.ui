@@ -668,7 +668,7 @@ color: rgb(65, 65, 65);</string>
     <string notr="true"/>
    </property>
    <property name="pixmap">
-    <pixmap resource="timer.qrc">:/icon/trytickmo.gif</pixmap>
+    <pixmap resource="../../tickmo.qrc">:/icon/trytickmo.gif</pixmap>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
@@ -715,7 +715,7 @@ color: rgb(65, 65, 65);</string>
     <string notr="true"/>
    </property>
    <property name="pixmap">
-    <pixmap resource="timer.qrc">:/icon/mail.png</pixmap>
+    <pixmap resource="../../tickmo.qrc">:/icon/mail.png</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>
@@ -734,7 +734,7 @@ color: rgb(65, 65, 65);</string>
     <string notr="true"/>
    </property>
    <property name="pixmap">
-    <pixmap resource="timer.qrc">:/icon/lock.png</pixmap>
+    <pixmap resource="../../tickmo.qrc">:/icon/lock.png</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>
@@ -742,7 +742,7 @@ color: rgb(65, 65, 65);</string>
   </widget>
  </widget>
  <resources>
-  <include location="timer.qrc"/>
+  <include location="../../tickmo.qrc"/>
  </resources>
  <connections/>
 </ui>

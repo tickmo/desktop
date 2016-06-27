@@ -1,18 +1,17 @@
 #include "timer.h"
 
-static xcb_screen_t * screen;
-
 Timer::Timer(imgUploader *imageUploader, MainImage *mainImage, QObject *parent) :
     QTimer(parent)
 {
     uploader = imageUploader;
     image = mainImage;
     running = false;
+    idle = new Idle();
+    connect(idle, SIGNAL(secondsIdle(int)), this, SLOT(on_idle(int)));
     nextSyncTime = QTime().currentTime();
     increaseInterval();
     connect(this, SIGNAL (timeout()), this, SLOT (tick()));
     start(1000);
-    screen = xcb_setup_roots_iterator (xcb_get_setup (QX11Info::connection())).data;
 }
 
 bool Timer::active()
@@ -42,17 +41,16 @@ void Timer::toggle()
         run();
 }
 
-void Timer::tick()
+void Timer::on_idle(int seconds)
 {
-    xcb_screensaver_query_info_cookie_t cookie = xcb_screensaver_query_info (QX11Info::connection(), screen->root);
-    xcb_screensaver_query_info_reply_t *info = xcb_screensaver_query_info_reply (QX11Info::connection(), cookie, NULL);
-    uint idle = info->ms_since_user_input;
-    free (info);
-    if (idle/1000 > 30)
+    if (seconds > 30)
     {
         pause();
-        return;
     }
+}
+
+void Timer::tick()
+{
     QTime current = QTime().currentTime();
     if (running && nextSyncTime <= current) {
         increaseInterval();

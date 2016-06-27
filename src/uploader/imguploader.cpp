@@ -1,5 +1,5 @@
 #include "imguploader.h"
-#include "mainwindow.h"
+#include "../mainwindow.h"
 
 imgUploader::imgUploader(QSettings *parentSettings, QObject *parent) :
     QObject(parent)

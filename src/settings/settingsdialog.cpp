@@ -7,7 +7,7 @@
 #include <QNetworkReply>
 #include <QUrl>
 #include <QDebug>
-#include "mainwindow.h"
+#include "../mainwindow.h"
 
 SettingsDialog::SettingsDialog(QSettings *parentSettings, QWidget *parent, Qt::WindowFlags f) :
     QDialog(parent, f),
@@ -55,7 +55,6 @@ void SettingsDialog::on_loginButton_clicked()
         settings->setValue("User/token", replyData.object().value("token").toString());
         QString name = replyData.object().value("name").toString();
         settings->setValue("User/name", name);
-        ui->login->clear();
         ui->passwd->clear();
         delete reply;
         this->close();

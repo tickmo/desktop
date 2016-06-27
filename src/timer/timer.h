@@ -24,12 +24,10 @@
 #include <QUrl>
 #include <QByteArray>
 #include <QFile>
-#include <xcb/xcb.h>
-#include <xcb/screensaver.h>
-#include <QtX11Extras/QX11Info>
 
-#include "imguploader.h"
-#include "mainimage.h"
+#include "../uploader/imguploader.h"
+#include "../mainimage.h"
+#include "../idledetector/idle.h"
 
 class Timer : public QTimer
 {
@@ -41,6 +39,9 @@ public:
     void run();
     void pause();
     void toggle();
+
+public slots:
+    void on_idle(int seconds);
 
 private slots:
     void tick();
@@ -56,6 +57,7 @@ private:
     QTemporaryDir tempDir;
     imgUploader *uploader;
     MainImage *image;
+    Idle *idle;
 };
 
 #endif // TIMER_H
