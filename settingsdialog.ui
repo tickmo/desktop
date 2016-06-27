@@ -46,7 +46,7 @@
     </font>
    </property>
    <property name="styleSheet">
-    <string notr="true">padding: 10px 35px;
+    <string notr="true">padding: 10px 0 10px 35px;
 color: rgb(65, 65, 65);</string>
    </property>
    <property name="inputMethodHints">

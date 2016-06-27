@@ -17,8 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     image = new MainImage(ui->graphicsView, this);
     timer = new Timer(uploader, image, this);
 
-    QPixmap icon = QPixmap(":/icon/default.png").scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    setWindowIcon(QIcon(icon));
+    QPixmap icon = QPixmap(":/icon/icon.png").scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon(QIcon(icon));

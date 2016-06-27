@@ -5,5 +5,7 @@
         <file>icon/trytickmo.gif</file>
         <file>icon/lock.png</file>
         <file>icon/mail.png</file>
+        <file>icon/icon.png</file>
+        <file>assets/style.css</file>
     </qresource>
 </RCC>
