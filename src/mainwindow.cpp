@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     uploader = new imgUploader(settings, this);
     image = new MainImage(ui->graphicsView, this);
     timer = new Timer(uploader, image, this);
+    connect(timer, SIGNAL(status_changed()), this, SLOT(status_changed()));
 
     QPixmap icon = QPixmap(":/icon/icon.png").scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
@@ -73,14 +74,23 @@ void MainWindow::on_tickButton_clicked()
 
 void MainWindow::setButtonText()
 {
+    QPalette *palette = new QPalette(ui->tickButton->palette());
     if (timer->active()) {
+        palette->setColor(QPalette::Button, QColor::fromRgb(165, 44, 47));
         ui->tickButton->setText("Stop");
         trayIconMenu->actions().at(0)->setText(QString("&Stop"));
     }
     else {
+        palette->setColor(QPalette::Button, QColor::fromRgb(53, 104, 126));
         ui->tickButton->setText("Start");
         trayIconMenu->actions().at(0)->setText(QString("&Start"));
     }
+    ui->tickButton->setPalette(*palette);
+}
+
+void MainWindow::status_changed()
+{
+    setButtonText();
 }
 
 void MainWindow::on_toolButton_clicked()

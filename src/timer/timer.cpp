@@ -24,6 +24,7 @@ void Timer::run()
     running = true;
     increaseInterval();
     shoot();
+    status_changed();
 }
 
 void Timer::pause()
@@ -31,6 +32,7 @@ void Timer::pause()
     running = false;
     image->reset();
     uploader->uploadFiles(false);
+    status_changed();
 }
 
 void Timer::toggle()

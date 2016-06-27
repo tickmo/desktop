@@ -43,6 +43,9 @@ public:
 public slots:
     void on_idle(int seconds);
 
+signals:
+    void status_changed();
+
 private slots:
     void tick();
 

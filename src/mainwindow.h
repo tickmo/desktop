@@ -45,6 +45,7 @@ public:
 private slots:
     void on_tickButton_clicked();
     void on_toolButton_clicked();
+    void status_changed();
 
 private:
     void setButtonText();
