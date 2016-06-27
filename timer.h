@@ -24,6 +24,9 @@
 #include <QUrl>
 #include <QByteArray>
 #include <QFile>
+#include <xcb/xcb.h>
+#include <xcb/screensaver.h>
+#include <QtX11Extras/QX11Info>
 
 #include "imguploader.h"
 #include "mainimage.h"

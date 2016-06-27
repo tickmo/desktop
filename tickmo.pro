@@ -2,6 +2,7 @@ QT += widgets \
       network
 TARGET = tickmo
 CONFIG += staticlib
+CONFIG += link_pkgconfig
 HEADERS     = \
     mainwindow.h \
     settingsdialog.h \
@@ -27,3 +28,7 @@ UI_DIR = qtcache/ui
 RESOURCES = timer.qrc
 
 CONFIG(debug, release|debug): DEFINES += DEBUG
+
+unix: PKGCONFIG += Qt5X11Extras
+unix: PKGCONFIG += xcb-screensaver
+unix: PKGCONFIG += xcb
