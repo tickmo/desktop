@@ -45,7 +45,7 @@ private slots:
 private:
     bool running;
     QTime nextSyncTime;
-    static const int INTERVAL = 3 * 60;
+    static const int INTERVAL = 5;
     void increaseInterval();
     void save(QPixmap pixmap);
     void shoot();

@@ -11,12 +11,11 @@ imgUploader::imgUploader(QSettings *parentSettings, QObject *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(onUploadTimeIsCome()));
     timer->start(UPLOAD_INTERVAL);
     quitAfterUploading = false;
-    removeFirstFromFileQueue = 0;
 }
 
-void imgUploader::uploadImage(QString FileName)
+void imgUploader::uploadImage(QString filename)
 {
-    filesQueue.append(FileName);
+    filesQueue.enqueue(filename);
 }
 
 void imgUploader::uploadFiles(bool quitAfterAll)
@@ -40,11 +39,12 @@ void imgUploader::uploadFiles(bool quitAfterAll)
     QString authHeader = "Token token=\"" + token + "\", user_email=\"" + username + "\"";
     request.setRawHeader("Authorization", authHeader.toLocal8Bit());
 
-    for (int i = 0; i < filesQueue.size(); i++)
+    while (!filesQueue.isEmpty())
     {
-        QString FileName = filesQueue.at(i);
-        QFile *file = new QFile(FileName);
-        QFileInfo *fileInfo = new QFileInfo(FileName);
+        QString filename = filesQueue.dequeue();
+        failedQueue.enqueue(filename);
+        QFile *file = new QFile(filename);
+        QFileInfo *fileInfo = new QFileInfo(filename);
         file->setParent(multiPart);
         file->open(QIODevice::ReadOnly);
 
@@ -54,7 +54,6 @@ void imgUploader::uploadFiles(bool quitAfterAll)
 
         imagePart.setBodyDevice(file);
         multiPart->append(imagePart);
-        removeFirstFromFileQueue = i + 1;
     }
 
     request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=" + multiPart->boundary());
@@ -75,13 +74,19 @@ bool imgUploader::isUploading()
 void imgUploader::onUploadFinished()
 {
     uploading = false;
-    currentUpload->deleteLater();
-    emit uploadFinished();
-    if (removeFirstFromFileQueue > 0) {
-        for (int i = 1; i < removeFirstFromFileQueue; i++) {
-            filesQueue.takeAt(i);
+    if (currentUpload->error() == QNetworkReply::NoError)
+    {
+        failedQueue.clear();
+    }
+    else
+    {
+        while (!failedQueue.isEmpty())
+        {
+            filesQueue.enqueue(failedQueue.dequeue());
         }
     }
+    currentUpload->deleteLater();
+    emit uploadFinished();
     if (quitAfterUploading) {
         QApplication::quit();
     }
