@@ -24,6 +24,7 @@
 #include <QUrl>
 #include <QByteArray>
 #include <QFile>
+#include <QDateTime>
 
 #include "../uploader/imguploader.h"
 #include "../mainimage.h"
@@ -52,15 +53,20 @@ private slots:
 private:
     bool running;
     QTime nextSyncTime;
+    // Set interval to ~8 minutes, to create about 60 screenshot per day.
     static const int INTERVAL = 5;
     void increaseInterval();
     void save(QPixmap pixmap);
     void shoot();
+    uint currentTime();
+    void saveTime();
     QPixmap originalPixmap;
     QTemporaryDir tempDir;
     imgUploader *uploader;
     MainImage *image;
     Idle *idle;
+    uint unixtime;
+    QDateTime currentDateTime;
 };
 
 #endif // TIMER_H

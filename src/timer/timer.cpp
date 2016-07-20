@@ -11,6 +11,7 @@ Timer::Timer(imgUploader *imageUploader, MainImage *mainImage, QObject *parent) 
     nextSyncTime = QTime().currentTime();
     increaseInterval();
     connect(this, SIGNAL (timeout()), this, SLOT (tick()));
+    unixtime = currentTime();
     start(1000);
 }
 
@@ -31,6 +32,7 @@ void Timer::pause()
 {
     running = false;
     image->reset();
+    saveTime();
     uploader->uploadFiles(false);
     status_changed();
 }
@@ -57,6 +59,7 @@ void Timer::tick()
     if (running && nextSyncTime <= current) {
         increaseInterval();
         shoot();
+        saveTime();
     }
 }
 
@@ -70,12 +73,20 @@ void Timer::save(QPixmap pixmap)
     if (tempDir.isValid()) {
         image->set(pixmap);
         // Send image to uploader.
-        qint64 second = QDateTime::currentMSecsSinceEpoch();
+        qint64 second = currentTime();
         QString format = "png";
         QString fileName = QString(tempDir.path() + "/screenshot-" + QString::number(second) + "." + format);
         pixmap.save(fileName, format.toUtf8().constData());
         uploader->uploadImage(fileName);
     }
+}
+
+void Timer::saveTime()
+{
+    // queue time to uploader.
+    uint current = currentTime();
+    uploader->addTime(TimeMessage(unixtime, current));
+    unixtime = current;
 }
 
 void Timer::shoot()
@@ -86,4 +97,9 @@ void Timer::shoot()
         pixmap = screen->grabWindow(0);
         save(pixmap);
     }
+}
+
+uint Timer::currentTime()
+{
+    return QDateTime::currentDateTimeUtc().toTime_t();
 }

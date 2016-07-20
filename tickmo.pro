@@ -9,7 +9,8 @@ HEADERS     = \
     src/mainwindow.h \
     src/settings/settingsdialog.h \
     src/timer/timer.h \
-    src/uploader/imguploader.h
+    src/uploader/imguploader.h \
+    src/timer/timemessage.h
 SOURCES     = main.cpp \
     src/idledetector/idle_mac.cpp \
     src/idledetector/idle_win.cpp \

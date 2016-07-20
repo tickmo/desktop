@@ -18,10 +18,15 @@ void imgUploader::uploadImage(QString filename)
     filesQueue.enqueue(filename);
 }
 
+void imgUploader::addTime(TimeMessage timeMessage)
+{
+    timeMessagesQueue.enqueue(timeMessage);
+}
+
 void imgUploader::uploadFiles(bool quitAfterAll)
 {
     quitAfterUploading = quitAfterAll;
-    if (filesQueue.isEmpty()) {
+    if (filesQueue.isEmpty() && timeMessagesQueue.isEmpty()) {
         if (quitAfterUploading) {
             QApplication::quit();
         }
@@ -38,6 +43,26 @@ void imgUploader::uploadFiles(bool quitAfterAll)
     QString token = settings->value("User/token").toString();
     QString authHeader = "Token token=\"" + token + "\", user_email=\"" + username + "\"";
     request.setRawHeader("Authorization", authHeader.toLocal8Bit());
+
+    QJsonArray timeMessagesJson;
+    while (!timeMessagesQueue.isEmpty())
+    {
+        TimeMessage timeMessage = timeMessagesQueue.dequeue();
+        timeMessagesFailedQueue.enqueue(timeMessage);
+        QJsonObject item;
+        item.insert("from", QJsonValue((int) timeMessage.from));
+        item.insert("to", QJsonValue((int) timeMessage.to));
+        timeMessagesJson.append(item);
+    }
+    if (!timeMessagesJson.isEmpty()) {
+        QJsonDocument doc(timeMessagesJson);
+        QByteArray bytes = doc.toJson();
+        QHttpPart jsonPart;
+        jsonPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+        jsonPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"messages\""));
+        jsonPart.setBody(bytes);
+        multiPart->append(jsonPart);
+    }
 
     while (!filesQueue.isEmpty())
     {
@@ -77,12 +102,17 @@ void imgUploader::onUploadFinished()
     if (currentUpload->error() == QNetworkReply::NoError)
     {
         failedQueue.clear();
+        timeMessagesFailedQueue.clear();
     }
     else
     {
         while (!failedQueue.isEmpty())
         {
             filesQueue.enqueue(failedQueue.dequeue());
+        }
+        while (!timeMessagesFailedQueue.isEmpty())
+        {
+            timeMessagesQueue.enqueue(timeMessagesFailedQueue.dequeue());
         }
     }
     currentUpload->deleteLater();

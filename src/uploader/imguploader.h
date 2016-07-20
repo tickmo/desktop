@@ -12,6 +12,10 @@
 #include <QSettings>
 #include <QQueue>
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include "../timer/timemessage.h"
 
 class imgUploader : public QObject
 {
@@ -19,6 +23,7 @@ class imgUploader : public QObject
 public:
     explicit imgUploader(QSettings *parentSettings, QObject *parent = 0);
     void uploadImage(QString filename);
+    void addTime(TimeMessage timeMessage);
     void uploadFiles(bool quitAfterAll = false);
     QString UserAgent;
     bool isUploading();
@@ -30,6 +35,7 @@ private:
     QNetworkReply *currentUpload;
     QTimer *timer;
     QQueue<QString> filesQueue, failedQueue;
+    QQueue<TimeMessage> timeMessagesQueue, timeMessagesFailedQueue;
     bool uploading;
     bool quitAfterUploading;
 
